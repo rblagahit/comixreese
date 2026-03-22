@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { mangaDexService, Manga } from "../services/mangaDex";
 import { MangaCard } from "../components/MangaCard";
 import { SearchBar } from "../components/SearchBar";
+import { CacheStats } from "../components/CacheStats";
 import { motion } from "motion/react";
 import { TrendingUp, Clock, Star } from "lucide-react";
 
@@ -9,12 +10,22 @@ export const Home: React.FC = () => {
   const [mangaList, setMangaList] = useState<Manga[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [safeOnly, setSafeOnly] = useState(true);
 
   useEffect(() => {
     const fetchManga = async () => {
       setLoading(true);
       try {
-        const results = await mangaDexService.searchManga(searchQuery || "one piece");
+        let results;
+        if (searchQuery) {
+          results = await mangaDexService.searchManga({
+            query: searchQuery,
+            limit: 24,
+            contentRating: safeOnly ? ["safe"] : ["safe", "suggestive", "erotica"],
+          });
+        } else {
+          results = await mangaDexService.getPopularManga(24, safeOnly);
+        }
         setMangaList(results);
       } catch (error) {
         console.error("Error fetching manga:", error);
@@ -24,7 +35,7 @@ export const Home: React.FC = () => {
     };
 
     fetchManga();
-  }, [searchQuery]);
+  }, [searchQuery, safeOnly]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -50,7 +61,22 @@ export const Home: React.FC = () => {
           >
             Explore thousands of manga titles from MangaDex. Read, track, and bookmark your favorites.
           </motion.p>
-          <SearchBar onSearch={handleSearch} />
+          <div className="max-w-2xl mx-auto">
+            <SearchBar onSearch={handleSearch} />
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={safeOnly}
+                  onChange={(e) => setSafeOnly(e.target.checked)}
+                  className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                />
+                <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                  Safe for Work Only
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -101,6 +127,13 @@ export const Home: React.FC = () => {
             </button>
           </div>
         )}
+      </div>
+
+      {/* Cache Stats Section */}
+      <div className="max-w-7xl mx-auto px-4 mt-20 mb-12">
+        <div className="max-w-md">
+          <CacheStats />
+        </div>
       </div>
     </div>
   );

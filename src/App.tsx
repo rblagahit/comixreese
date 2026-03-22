@@ -111,7 +111,7 @@ function Navigation() {
               <Search className="w-6 h-6" />
             </div>
             <span className="text-xl font-bold text-gray-900 tracking-tight">
-              Comics<span className="text-emerald-600">App</span>
+              Comix<span className="text-emerald-600">Reese</span>
             </span>
           </Link>
 

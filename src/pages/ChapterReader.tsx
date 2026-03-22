@@ -2,25 +2,30 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Reader } from "../components/Reader";
 import { ChevronLeft } from "lucide-react";
-import axios from "axios";
+import { mangaDexService, Chapter } from "../services/mangaDex";
 
 export const ChapterReader: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [mangaId, setMangaId] = useState<string | null>(null);
   const [chapterNumber, setChapterNumber] = useState<string | undefined>();
+  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChapterInfo = async () => {
       if (!id) return;
+      setLoading(true);
       try {
-        const response = await axios.get(`/api/mangadex/chapter/${id}`);
-        const data = response.data.data;
-        setChapterNumber(data.attributes.chapter);
-        const mangaRel = data.relationships.find((rel: any) => rel.type === "manga");
-        if (mangaRel) {
-          setMangaId(mangaRel.id);
+        const chapterData = await mangaDexService.getChapterDetails(id);
+        setChapterNumber(chapterData.chapterNumber);
+        setMangaId(chapterData.comicId);
+
+        if (chapterData.comicId) {
+          const mangaChapters = await mangaDexService.getMangaChapters(chapterData.comicId);
+          // Sort ascending for navigation logic (currentIndex + 1 = next chapter)
+          const sortedChapters = [...mangaChapters].sort((a, b) => parseFloat(a.chapterNumber) - parseFloat(b.chapterNumber));
+          setChapters(sortedChapters);
         }
       } catch (error) {
         console.error("Error fetching chapter info:", error);
@@ -31,6 +36,24 @@ export const ChapterReader: React.FC = () => {
 
     fetchChapterInfo();
   }, [id]);
+
+  const handleChapterChange = (direction: "prev" | "next") => {
+    if (!id || chapters.length === 0) return;
+
+    const currentIndex = chapters.findIndex((c) => c.id === id);
+    if (currentIndex === -1) return;
+
+    let nextChapter: Chapter | undefined;
+    if (direction === "next") {
+      nextChapter = chapters[currentIndex + 1];
+    } else {
+      nextChapter = chapters[currentIndex - 1];
+    }
+
+    if (nextChapter) {
+      navigate(`/chapter/${nextChapter.id}`, { replace: true });
+    }
+  };
 
   if (!id) return null;
 
@@ -48,7 +71,7 @@ export const ChapterReader: React.FC = () => {
       {/* Reader Header */}
       <div className="sticky top-0 z-20 w-full px-4 py-4 bg-black/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(mangaId ? `/manga/${mangaId}` : "/")}
           className="flex items-center gap-2 text-white/80 hover:text-white transition-colors group"
         >
           <div className="p-2 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors">
@@ -59,7 +82,7 @@ export const ChapterReader: React.FC = () => {
         
         <div className="hidden md:block">
           <h1 className="text-white/60 text-sm font-medium tracking-wide uppercase">
-            Chapter Reader
+            Chapter {chapterNumber}
           </h1>
         </div>
         
@@ -67,7 +90,14 @@ export const ChapterReader: React.FC = () => {
       </div>
 
       <div className="pt-8">
-        {mangaId && <Reader mangaId={mangaId} chapterId={id} chapterNumber={chapterNumber} />}
+        {mangaId && (
+          <Reader 
+            mangaId={mangaId} 
+            chapterId={id} 
+            chapterNumber={chapterNumber} 
+            onChapterChange={handleChapterChange}
+          />
+        )}
       </div>
     </div>
   );

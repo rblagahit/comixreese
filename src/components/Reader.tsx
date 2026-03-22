@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Maximize, Minimize, Settings } from "lucide-react";
-import { mangaDexService } from "../services/mangaDex";
+import { mangaDexService, Page } from "../services/mangaDex";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../App";
 import { db, handleFirestoreError, OperationType } from "../firebase";
@@ -15,9 +15,7 @@ interface ReaderProps {
 
 export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumber, onChapterChange }) => {
   const { user } = useAuth();
-  const [pages, setPages] = useState<string[]>([]);
-  const [baseUrl, setBaseUrl] = useState("");
-  const [hash, setHash] = useState("");
+  const [pages, setPages] = useState<Page[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -28,8 +26,6 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
       try {
         const data = await mangaDexService.getChapterPages(chapterId);
         setPages(data.pages);
-        setBaseUrl(data.baseUrl);
-        setHash(data.hash);
         setCurrentPage(0);
       } catch (error) {
         console.error("Error fetching pages:", error);
@@ -149,7 +145,7 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
-            src={mangaDexService.getPageUrl(baseUrl, hash, pages[currentPage])}
+            src={mangaDexService.getPageUrl(pages[currentPage])}
             alt={`Page ${currentPage + 1}`}
             className="max-w-full h-auto shadow-2xl rounded-lg"
             referrerPolicy="no-referrer"

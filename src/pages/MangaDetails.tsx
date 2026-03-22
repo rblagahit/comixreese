@@ -182,7 +182,7 @@ export const MangaDetails: React.FC = () => {
                   </Link>
                 ) : chapters.length > 0 ? (
                   <Link
-                    to={`/chapter/${chapters[0].id}`}
+                    to={`/chapter/${[...chapters].sort((a, b) => parseFloat(a.chapterNumber) - parseFloat(b.chapterNumber))[0].id}`}
                     className="flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:bg-emerald-700 transition-all hover:scale-105"
                   >
                     <Play className="w-5 h-5 fill-current" />
@@ -258,14 +258,14 @@ export const MangaDetails: React.FC = () => {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-500 font-bold rounded-xl group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
-                        {chapter.chapter}
+                        {chapter.chapterNumber}
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">
                           {chapter.title}
                         </h3>
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {new Date(chapter.publishAt).toLocaleDateString()}
+                          {new Date(chapter.publishedAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
