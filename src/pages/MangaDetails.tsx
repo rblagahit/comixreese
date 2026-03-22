@@ -131,7 +131,7 @@ export const MangaDetails: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 transition-colors duration-300">
       {/* Hero Header */}
       <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
         <img
@@ -140,14 +140,14 @@ export const MangaDetails: React.FC = () => {
           className="w-full h-full object-cover blur-2xl scale-110 opacity-30"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-50 dark:from-gray-950 via-gray-50/80 dark:via-gray-950/80 to-transparent" />
         
         <div className="absolute inset-0 flex items-end px-4 pb-12">
           <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-8 items-center md:items-end">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-48 md:w-64 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white flex-shrink-0"
+              className="w-48 md:w-64 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 flex-shrink-0"
             >
               <img
                 src={manga.coverUrl}
@@ -162,7 +162,7 @@ export const MangaDetails: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight"
+                className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight"
               >
                 {manga.title}
               </motion.h1>
@@ -172,11 +172,11 @@ export const MangaDetails: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-6"
               >
-                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase rounded-full">
+                <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase rounded-full">
                   {manga.status}
                 </span>
-                <span className="text-gray-500 font-medium">{manga.author}</span>
-                {manga.year && <span className="text-gray-400 font-medium">• {manga.year}</span>}
+                <span className="text-gray-500 dark:text-gray-400 font-medium">{manga.author}</span>
+                {manga.year && <span className="text-gray-400 dark:text-gray-500 font-medium">• {manga.year}</span>}
               </motion.div>
               
               <motion.div
@@ -207,8 +207,8 @@ export const MangaDetails: React.FC = () => {
                   disabled={bookmarkLoading}
                   className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all ${
                     isBookmarked
-                      ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                      ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
                   {isBookmarked ? <Check className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
@@ -220,13 +220,13 @@ export const MangaDetails: React.FC = () => {
                   className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all ${
                     isImported
                       ? "bg-emerald-600 text-white shadow-lg"
-                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
                   {isImported ? <Library className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                   {isImported ? "In Library" : "Add to Library"}
                 </button>
-                <button className="p-3 bg-white text-gray-700 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all">
+                <button className="p-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
                   <Share2 className="w-5 h-5" />
                 </button>
               </motion.div>
@@ -237,11 +237,11 @@ export const MangaDetails: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 mt-8">
         {/* Tabs */}
-        <div className="flex items-center gap-8 border-b border-gray-200 mb-8">
+        <div className="flex items-center gap-8 border-b border-gray-200 dark:border-gray-800 mb-8">
           <button
             onClick={() => setActiveTab("chapters")}
             className={`flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-wider transition-all relative ${
-              activeTab === "chapters" ? "text-emerald-600" : "text-gray-400 hover:text-gray-600"
+              activeTab === "chapters" ? "text-emerald-600" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             <List className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const MangaDetails: React.FC = () => {
           <button
             onClick={() => setActiveTab("info")}
             className={`flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-wider transition-all relative ${
-              activeTab === "info" ? "text-emerald-600" : "text-gray-400 hover:text-gray-600"
+              activeTab === "info" ? "text-emerald-600" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             <Info className="w-4 h-4" />
@@ -279,27 +279,27 @@ export const MangaDetails: React.FC = () => {
                   <Link
                     key={chapter.id}
                     to={`${location.pathname.startsWith("/comics/") ? "/read" : "/chapter"}/${chapter.id}`}
-                    className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-emerald-500/30 hover:bg-emerald-50/30 transition-all group"
+                    className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-emerald-500/30 dark:hover:border-emerald-500/30 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-500 font-bold rounded-xl group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+                      <div className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold rounded-xl group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {chapter.chapterNumber}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                           {chapter.title}
                         </h3>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                           {new Date(chapter.publishedAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 transition-colors" />
                   </Link>
                 ))
               ) : (
-                <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-                  <p className="text-gray-400">No chapters found for this manga.</p>
+                <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                  <p className="text-gray-400 dark:text-gray-500">No chapters found for this manga.</p>
                 </div>
               )}
             </motion.div>
@@ -309,29 +309,29 @@ export const MangaDetails: React.FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+              className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors duration-300"
             >
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Description</h3>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Description</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
                 {manga.description || "No description available."}
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
                 <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Author</h4>
-                  <p className="text-gray-900 font-medium">{manga.author}</p>
+                  <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Author</h4>
+                  <p className="text-gray-900 dark:text-white font-medium">{manga.author}</p>
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Status</h4>
-                  <p className="text-gray-900 font-medium capitalize">{manga.status}</p>
+                  <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Status</h4>
+                  <p className="text-gray-900 dark:text-white font-medium capitalize">{manga.status}</p>
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Year</h4>
-                  <p className="text-gray-900 font-medium">{manga.year || "N/A"}</p>
+                  <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Year</h4>
+                  <p className="text-gray-900 dark:text-white font-medium">{manga.year || "N/A"}</p>
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Language</h4>
-                  <p className="text-gray-900 font-medium">English</p>
+                  <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Language</h4>
+                  <p className="text-gray-900 dark:text-white font-medium">English</p>
                 </div>
               </div>
             </motion.div>

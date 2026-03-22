@@ -59,13 +59,13 @@ export const Bookmarks: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-32 pb-20 px-4 transition-colors duration-300">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <BookmarkIcon className="w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">Your Bookmarks</h1>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">Your Bookmarks</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
             Sign in to save your favorite manga and sync them across all your devices.
           </p>
           <button
@@ -80,12 +80,12 @@ export const Bookmarks: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-32 pb-20 px-4 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Your Bookmarks</h1>
-            <p className="text-gray-500 mt-1">You have {bookmarks.length} saved manga</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Your Bookmarks</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">You have {bookmarks.length} saved manga</p>
           </div>
           <Link
             to="/"
@@ -100,8 +100,8 @@ export const Bookmarks: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-[2/3] bg-gray-200 rounded-xl mb-3" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="aspect-[2/3] bg-gray-200 dark:bg-gray-800 rounded-xl mb-3" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2" />
               </div>
             ))}
           </div>
@@ -115,7 +115,7 @@ export const Bookmarks: React.FC = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="group relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+                  className="group relative bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   <Link to={`/manga/${bookmark.mangaId}`}>
                     <div className="aspect-[2/3] relative overflow-hidden">
@@ -140,10 +140,10 @@ export const Bookmarks: React.FC = () => {
                       </div>
                     </div>
                     <div className="p-3">
-                      <h3 className="font-semibold text-gray-900 line-clamp-1 text-sm">
+                      <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 text-sm">
                         {bookmark.title}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1">{bookmark.author}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{bookmark.author}</p>
                     </div>
                   </Link>
                 </motion.div>
@@ -151,11 +151,11 @@ export const Bookmarks: React.FC = () => {
             </AnimatePresence>
           </div>
         ) : (
-          <div className="bg-white p-20 rounded-3xl border border-dashed border-gray-200 text-center">
-            <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-gray-900 p-20 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 text-center transition-colors duration-300">
+            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <BookmarkIcon className="w-8 h-8" />
             </div>
-            <p className="text-gray-400 mb-6">You haven't bookmarked any manga yet.</p>
+            <p className="text-gray-400 dark:text-gray-500 mb-6">You haven't bookmarked any manga yet.</p>
             <Link
               to="/"
               className="inline-flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:bg-emerald-700 transition-all"

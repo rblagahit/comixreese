@@ -31,22 +31,22 @@ export const Library: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-32 pb-20 px-4 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2">Community Library</h1>
-            <p className="text-gray-500">Manga imported and shared by the community.</p>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-2 transition-colors duration-300">Community Library</h1>
+            <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">Manga imported and shared by the community.</p>
           </div>
           
           <div className="relative max-w-md w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="Search library..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white"
             />
           </div>
         </div>
@@ -55,9 +55,9 @@ export const Library: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {[...Array(12)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-[2/3] bg-gray-200 rounded-2xl mb-3" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="aspect-[2/3] bg-gray-200 dark:bg-gray-800 rounded-2xl mb-3" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
               </div>
             ))}
           </div>
@@ -71,7 +71,7 @@ export const Library: React.FC = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100"
+                  className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-800"
                 >
                   <Link to={`/manga/${comic.mangadexId}`}>
                     <div className="aspect-[2/3] relative overflow-hidden">
@@ -86,15 +86,15 @@ export const Library: React.FC = () => {
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-gray-900 line-clamp-1 text-sm mb-1 group-hover:text-emerald-600 transition-colors">
+                      <h3 className="font-bold text-gray-900 dark:text-white line-clamp-1 text-sm mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {comic.title}
                       </h3>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase rounded">
+                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase rounded transition-colors duration-300">
                           {comic.status}
                         </span>
                         {comic.year && (
-                          <span className="text-[10px] text-gray-400 font-medium">{comic.year}</span>
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium transition-colors duration-300">{comic.year}</span>
                         )}
                       </div>
                     </div>
@@ -104,12 +104,12 @@ export const Library: React.FC = () => {
             </AnimatePresence>
           </div>
         ) : (
-          <div className="bg-white p-20 rounded-[3rem] border border-dashed border-gray-200 text-center">
-            <div className="w-20 h-20 bg-gray-50 text-gray-300 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <div className="bg-white dark:bg-gray-900 p-20 rounded-[3rem] border border-dashed border-gray-200 dark:border-gray-800 text-center transition-colors duration-300">
+            <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <LibraryIcon className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No comics found</h2>
-            <p className="text-gray-400 mb-8 max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No comics found</h2>
+            <p className="text-gray-400 dark:text-gray-500 mb-8 max-w-md mx-auto">
               The library is empty or your search didn't match any results. 
               Try importing some manga from the home page!
             </p>

@@ -14,6 +14,48 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, User as FirebaseUser, db, OperationType, handleFirestoreError } from "./firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { Sun, Moon } from "lucide-react";
+
+// Theme Context
+interface ThemeContextType {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) throw new Error("useTheme must be used within a ThemeProvider");
+  return context;
+};
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
 
 // Auth Context
 interface AuthContextType {
@@ -84,6 +126,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 function Navigation() {
   const location = useLocation();
   const { user, signIn, logout } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -106,7 +149,9 @@ function Navigation() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+          isScrolled 
+            ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm py-3" 
+            : "bg-transparent py-5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
@@ -114,7 +159,7 @@ function Navigation() {
             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
               <Search className="w-6 h-6" />
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">
+            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
               Comix<span className="text-emerald-600">Reese</span>
             </span>
           </Link>
@@ -124,7 +169,7 @@ function Navigation() {
             <Link
               to="/"
               className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
-                isActive("/") ? "text-emerald-600" : "text-gray-500 hover:text-gray-900"
+                isActive("/") ? "text-emerald-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <HomeIcon className="w-4 h-4" />
@@ -133,7 +178,7 @@ function Navigation() {
             <Link
               to="/bookmarks"
               className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
-                isActive("/bookmarks") ? "text-emerald-600" : "text-gray-500 hover:text-gray-900"
+                isActive("/bookmarks") ? "text-emerald-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <Bookmark className="w-4 h-4" />
@@ -142,18 +187,28 @@ function Navigation() {
             <Link
               to="/library"
               className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
-                isActive("/library") ? "text-emerald-600" : "text-gray-500 hover:text-gray-900"
+                isActive("/library") ? "text-emerald-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <LibraryIcon className="w-4 h-4" />
               Library
             </Link>
             
+            <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-2" />
+
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 p-1 pr-3 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <img
                     src={user.photoURL || ""}
@@ -161,7 +216,7 @@ function Navigation() {
                     className="w-8 h-8 rounded-full object-cover"
                     referrerPolicy="no-referrer"
                   />
-                  <span className="text-sm font-semibold text-gray-700">{user.displayName?.split(" ")[0]}</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{user.displayName?.split(" ")[0]}</span>
                 </button>
                 
                 <AnimatePresence>
@@ -170,14 +225,14 @@ function Navigation() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-2"
+                      className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-2"
                     >
                       <button
                         onClick={() => {
                           logout();
                           setIsUserMenuOpen(false);
                         }}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
                         Sign Out
@@ -189,7 +244,7 @@ function Navigation() {
             ) : (
               <button
                 onClick={signIn}
-                className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors"
+                className="flex items-center gap-2 px-5 py-2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
               >
                 <User className="w-4 h-4" />
                 Sign In
@@ -198,12 +253,20 @@ function Navigation() {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-gray-500 hover:text-gray-900 transition-colors"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-xl transition-colors"
+            >
+              {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -214,13 +277,13 @@ function Navigation() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-white pt-24 px-4 md:hidden"
+            className="fixed inset-0 z-40 bg-white dark:bg-gray-900 pt-24 px-4 md:hidden"
           >
             <div className="flex flex-col gap-6">
               <Link
                 to="/"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-4 text-2xl font-bold text-gray-900"
+                className="flex items-center gap-4 text-2xl font-bold text-gray-900 dark:text-white"
               >
                 <HomeIcon className="w-6 h-6 text-emerald-600" />
                 Home
@@ -228,7 +291,7 @@ function Navigation() {
               <Link
                 to="/bookmarks"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-4 text-2xl font-bold text-gray-900"
+                className="flex items-center gap-4 text-2xl font-bold text-gray-900 dark:text-white"
               >
                 <Bookmark className="w-6 h-6 text-emerald-600" />
                 Bookmarks
@@ -236,14 +299,14 @@ function Navigation() {
               <Link
                 to="/library"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-4 text-2xl font-bold text-gray-900"
+                className="flex items-center gap-4 text-2xl font-bold text-gray-900 dark:text-white"
               >
                 <LibraryIcon className="w-6 h-6 text-emerald-600" />
                 Library
               </Link>
               
               {user ? (
-                <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
+                <div className="flex flex-col gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <div className="flex items-center gap-4">
                     <img
                       src={user.photoURL || ""}
@@ -252,8 +315,8 @@ function Navigation() {
                       referrerPolicy="no-referrer"
                     />
                     <div>
-                      <p className="font-bold text-gray-900">{user.displayName}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                      <p className="font-bold text-gray-900 dark:text-white">{user.displayName}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
                   </div>
                   <button
@@ -261,7 +324,7 @@ function Navigation() {
                       logout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 text-red-600 rounded-2xl text-lg font-bold"
+                    className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-2xl text-lg font-bold"
                   >
                     <LogOut className="w-5 h-5" />
                     Sign Out
@@ -289,25 +352,27 @@ function Navigation() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Navigation />
-          <main className="pt-0">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/comics" element={<Home />} />
-              <Route path="/manga/:id" element={<MangaDetails />} />
-              <Route path="/comics/:id" element={<MangaDetails />} />
-              <Route path="/chapter/:id" element={<ChapterReader />} />
-              <Route path="/read/:id" element={<ChapterReader />} />
-              <Route path="/bookmarks" element={<Bookmarks />} />
-              <Route path="/library" element={<Library />} />
-            </Routes>
-          </main>
-        </div>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+            <Navigation />
+            <main className="pt-0">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/comics" element={<Home />} />
+                <Route path="/manga/:id" element={<MangaDetails />} />
+                <Route path="/comics/:id" element={<MangaDetails />} />
+                <Route path="/chapter/:id" element={<ChapterReader />} />
+                <Route path="/read/:id" element={<ChapterReader />} />
+                <Route path="/bookmarks" element={<Bookmarks />} />
+                <Route path="/library" element={<Library />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

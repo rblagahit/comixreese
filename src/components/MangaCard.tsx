@@ -14,7 +14,7 @@ export const MangaCard: React.FC<MangaCardProps> = ({ manga }) => {
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
     >
       <Link to={`${pathPrefix}/${manga.id}`}>
         <div className="aspect-[2/3] relative overflow-hidden">
@@ -29,16 +29,16 @@ export const MangaCard: React.FC<MangaCardProps> = ({ manga }) => {
           </div>
         </div>
         <div className="p-3">
-          <h3 className="font-semibold text-gray-900 line-clamp-1 text-sm" title={manga.title}>
+          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 text-sm" title={manga.title}>
             {manga.title}
           </h3>
-          <p className="text-xs text-gray-500 mt-1">{manga.author}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{manga.author}</p>
           <div className="flex items-center gap-2 mt-2">
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase rounded">
+            <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase rounded">
               {manga.status}
             </span>
             {manga.year && (
-              <span className="text-[10px] text-gray-400 font-medium">{manga.year}</span>
+              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{manga.year}</span>
             )}
           </div>
         </div>

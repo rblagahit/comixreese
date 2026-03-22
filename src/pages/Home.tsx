@@ -42,14 +42,14 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 transition-colors duration-300">
       {/* Hero Section */}
-      <div className="bg-white border-b border-gray-100 py-12 px-4 mb-8">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 py-12 px-4 mb-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight"
+            className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight"
           >
             Discover Your Next <span className="text-emerald-600">Adventure</span>
           </motion.h1>
@@ -57,7 +57,7 @@ export const Home: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-gray-500 text-lg mb-8 max-w-2xl mx-auto"
+            className="text-gray-500 dark:text-gray-400 text-lg mb-8 max-w-2xl mx-auto"
           >
             Explore thousands of manga titles from MangaDex. Read, track, and bookmark your favorites.
           </motion.p>
@@ -69,9 +69,9 @@ export const Home: React.FC = () => {
                   type="checkbox"
                   checked={safeOnly}
                   onChange={(e) => setSafeOnly(e.target.checked)}
-                  className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                  className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-gray-700 rounded focus:ring-emerald-500"
                 />
-                <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
                   Safe for Work Only
                 </span>
               </label>
@@ -87,11 +87,11 @@ export const Home: React.FC = () => {
             <TrendingUp className="w-4 h-4" />
             Trending
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-100 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <Clock className="w-4 h-4" />
             Latest Updates
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-100 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <Star className="w-4 h-4" />
             Top Rated
           </button>
@@ -102,9 +102,9 @@ export const Home: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {[...Array(12)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-[2/3] bg-gray-200 rounded-xl mb-3" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="aspect-[2/3] bg-gray-200 dark:bg-gray-800 rounded-xl mb-3" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
               </div>
             ))}
           </div>
@@ -118,7 +118,7 @@ export const Home: React.FC = () => {
 
         {!loading && mangaList.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No manga found for "{searchQuery}"</p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">No manga found for "{searchQuery}"</p>
             <button
               onClick={() => setSearchQuery("")}
               className="mt-4 text-emerald-600 font-medium hover:underline"
