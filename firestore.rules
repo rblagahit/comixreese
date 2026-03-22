@@ -135,15 +135,24 @@ service cloud.firestore {
 
     function isValidChapter(data) {
       return hasRequiredFields(['mangadexId', 'comicId', 'chapterNumber', 'publishedAt']) &&
-             hasOnlyAllowedFields(['mangadexId', 'comicId', 'chapterNumber', 'title', 'volumeNumber', 'language', 'publishedAt', 'scanStatus']) &&
+             hasOnlyAllowedFields(['mangadexId', 'comicId', 'chapterNumber', 'title', 'pagesCount', 'volumeNumber', 'language', 'publishedAt', 'scanStatus']) &&
              data.mangadexId is string && data.mangadexId.size() < 100 &&
              data.comicId is string && data.comicId.size() < 100 &&
              data.chapterNumber is string && data.chapterNumber.size() < 20 &&
              (data.title == null || (data.title is string && data.title.size() < 200)) &&
+             (data.pagesCount == null || data.pagesCount is int) &&
              (data.volumeNumber == null || data.volumeNumber is int) &&
              (data.language == null || (data.language is string && data.language.size() < 10)) &&
              data.publishedAt is timestamp &&
              (data.scanStatus == null || (data.scanStatus is string && data.scanStatus.size() < 20));
+    }
+
+    function isValidPage(data) {
+      return hasRequiredFields(['pageNumber', 'originalData', 'createdAt']) &&
+             hasOnlyAllowedFields(['pageNumber', 'originalData', 'createdAt']) &&
+             data.pageNumber is int && data.pageNumber >= 1 &&
+             data.originalData is string && data.originalData.size() < 10000 &&
+             data.createdAt is timestamp;
     }
 
     // ===============================================================
@@ -161,6 +170,13 @@ service cloud.firestore {
         allow create: if isAuthenticated() && isValidChapter(request.resource.data);
         allow update: if isAuthenticated() && isValidChapter(request.resource.data);
         allow delete: if isAdmin();
+
+        match /pages/{pageId} {
+          allow read: if true;
+          allow create: if isAuthenticated() && isValidPage(request.resource.data);
+          allow update: if isAuthenticated() && isValidPage(request.resource.data);
+          allow delete: if isAdmin();
+        }
       }
     }
 

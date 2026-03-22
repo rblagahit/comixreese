@@ -39,10 +39,18 @@ export interface Chapter {
   comicId: string;
   chapterNumber: string;
   title: string;
+  pagesCount: number | null;
   volumeNumber: number | null;
   language: string;
   publishedAt: Timestamp;
   scanStatus: string;
+}
+
+export interface PageRecord {
+  id: string;
+  pageNumber: number;
+  originalData: string;
+  createdAt: Timestamp;
 }
 
 export interface Bookmark {
@@ -182,11 +190,15 @@ export const comicService = {
             comicId: comicId,
             chapterNumber: chapter.chapterNumber || '0',
             title: chapter.title || '',
+            pagesCount: chapter.pagesCount || null,
             volumeNumber: chapter.volumeNumber,
             language: chapter.language,
             publishedAt: Timestamp.fromDate(publishedAt),
             scanStatus: 'pending',
           }, { merge: true });
+
+          // Fetch pages for this chapter
+          await this.fetchChapterPages(comicId, chapter.id, chapter.id);
         }
 
         offset += limitCount;
@@ -204,6 +216,77 @@ export const comicService = {
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
+    }
+  },
+
+  async fetchChapterPages(comicId: string, chapterId: string, mangadexChapterId: string) {
+    const chapterRef = doc(db, 'comics', comicId, 'chapters', chapterId);
+    const pagesPath = `comics/${comicId}/chapters/${chapterId}/pages`;
+    
+    try {
+      await updateDoc(chapterRef, { scanStatus: 'fetching' });
+
+      const pagesData = await mangaDexService.getChapterPages(mangadexChapterId);
+      if (!pagesData) {
+        throw new Error('Failed to fetch pages from MangaDex');
+      }
+
+      // Clear existing pages
+      const existingPages = await getDocs(collection(db, 'comics', comicId, 'chapters', chapterId, 'pages'));
+      for (const pageDoc of existingPages.docs) {
+        await deleteDoc(pageDoc.ref);
+      }
+
+      // Insert new pages
+      const pageRecords: any[] = [];
+      for (let i = 0; i < pagesData.pages.length; i++) {
+        const page = pagesData.pages[i];
+        const pageDocRef = doc(collection(db, 'comics', comicId, 'chapters', chapterId, 'pages'));
+        const pageData = {
+          pageNumber: i + 1,
+          originalData: JSON.stringify(page),
+          createdAt: serverTimestamp(),
+        };
+        await setDoc(pageDocRef, pageData);
+        pageRecords.push(pageData);
+      }
+
+      await updateDoc(chapterRef, {
+        pagesCount: pageRecords.length,
+        scanStatus: 'ready',
+      });
+
+      // Pre-cache first 5 pages
+      this.preCachePages(comicId, chapterId, 1, Math.min(5, pageRecords.length));
+
+    } catch (error) {
+      await updateDoc(chapterRef, { scanStatus: 'failed' });
+      handleFirestoreError(error, OperationType.WRITE, pagesPath);
+    }
+  },
+
+  async preCachePages(comicId: string, chapterId: string, startPage: number, endPage: number) {
+    try {
+      const pagesRef = collection(db, 'comics', comicId, 'chapters', chapterId, 'pages');
+      const q = query(pagesRef, where('pageNumber', '>=', startPage), where('pageNumber', '<=', endPage));
+      const snapshot = await getDocs(q);
+      
+      const pages = snapshot.docs.map(doc => doc.data() as PageRecord);
+      
+      for (const pageRecord of pages) {
+        try {
+          const pageData = JSON.parse(pageRecord.originalData);
+          const url = mangaDexService.getPageUrl(pageData);
+          
+          // Trigger server-side cache by fetching the URL
+          // We use no-cors because we just want the server to process the request and cache the image
+          fetch(url, { mode: 'no-cors' }).catch(() => {});
+        } catch (e) {
+          console.error('Error parsing page data for pre-cache:', e);
+        }
+      }
+    } catch (error) {
+      console.error('Pre-cache error:', error);
     }
   },
 
@@ -261,6 +344,9 @@ export const comicService = {
         pageNumber,
         updatedAt: serverTimestamp(),
       }, { merge: true });
+
+      // Proactive pre-caching: pre-cache the next 3 pages
+      this.preCachePages(mangaId, chapterId, pageNumber + 1, pageNumber + 3);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
     }

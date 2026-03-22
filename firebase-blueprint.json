@@ -71,12 +71,24 @@
         "comicId": { "type": "string", "description": "The Firestore ID of the parent comic." },
         "chapterNumber": { "type": "string", "description": "The chapter number." },
         "title": { "type": "string", "description": "The chapter title." },
+        "pagesCount": { "type": "integer", "description": "Total number of pages." },
         "volumeNumber": { "type": "integer", "description": "The volume number." },
         "language": { "type": "string", "description": "The language code." },
         "publishedAt": { "type": "string", "format": "date-time", "description": "When it was published." },
         "scanStatus": { "type": "string", "description": "Scan status (pending, ready, error)." }
       },
       "required": ["mangadexId", "comicId", "chapterNumber"]
+    },
+    "Page": {
+      "title": "Page",
+      "description": "A page of a chapter.",
+      "type": "object",
+      "properties": {
+        "pageNumber": { "type": "integer", "description": "The page number." },
+        "originalData": { "type": "string", "description": "JSON string of the original page data." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the page record was created." }
+      },
+      "required": ["pageNumber", "originalData"]
     }
   },
   "firestore": {
@@ -99,6 +111,10 @@
     "/comics/{comicId}/chapters/{chapterId}": {
       "schema": "Chapter",
       "description": "Chapters subcollection for a comic."
+    },
+    "/comics/{comicId}/chapters/{chapterId}/pages/{pageId}": {
+      "schema": "Page",
+      "description": "Pages subcollection for a chapter."
     }
   }
 }
