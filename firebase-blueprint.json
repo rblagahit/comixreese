@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Information about the user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identifier for the user." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "email": { "type": "string", "description": "The user's email address." },
+        "photoURL": { "type": "string", "description": "The user's profile photo URL." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the profile was created." }
+      },
+      "required": ["uid", "email"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "A bookmarked manga for a user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID who bookmarked this." },
+        "mangaId": { "type": "string", "description": "The MangaDex ID of the manga." },
+        "title": { "type": "string", "description": "The title of the manga." },
+        "coverUrl": { "type": "string", "description": "The cover URL of the manga." },
+        "author": { "type": "string", "description": "The author of the manga." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the bookmark was created." }
+      },
+      "required": ["uid", "mangaId", "title"]
+    },
+    "ReadingProgress": {
+      "title": "Reading Progress",
+      "description": "Tracking the user's progress in a manga.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID." },
+        "mangaId": { "type": "string", "description": "The MangaDex ID of the manga." },
+        "chapterId": { "type": "string", "description": "The last read chapter ID." },
+        "chapterNumber": { "type": "string", "description": "The last read chapter number." },
+        "pageNumber": { "type": "integer", "description": "The last read page number." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When the progress was last updated." }
+      },
+      "required": ["uid", "mangaId", "chapterId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents."
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": "Bookmark",
+      "description": "User's bookmarked manga."
+    },
+    "/users/{userId}/progress/{mangaId}": {
+      "schema": "ReadingProgress",
+      "description": "User's reading progress for specific manga."
+    }
+  }
+}

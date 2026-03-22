@@ -1,0 +1,5 @@
+{
+  "name": "Comics App",
+  "description": "A full-featured comic and manga reader with MangaDex integration, reading progress tracking, and bookmarks.",
+  "requestFramePermissions": []
+}
