@@ -150,6 +150,13 @@ export const comicService = {
 
       const docRef = doc(collection(db, path));
       await setDoc(docRef, comicData);
+
+      // Backend call for import
+      fetch('/api/comics/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mangadexId: mangaData.id })
+      }).catch(() => {});
       
       // Fetch and store chapters
       await this.fetchChapters(docRef.id, mangaData.id);
@@ -300,6 +307,8 @@ export const comicService = {
 
       if (docSnap.exists()) {
         await deleteDoc(docRef);
+        // Backend call for unbookmarking
+        fetch(`/api/comics/${manga.id}/bookmark`, { method: 'DELETE' }).catch(() => {});
         return false; // Unbookmarked
       } else {
         await setDoc(docRef, {
@@ -310,6 +319,8 @@ export const comicService = {
           author: manga.author,
           createdAt: serverTimestamp(),
         });
+        // Backend call for bookmarking
+        fetch(`/api/comics/${manga.id}/bookmark`, { method: 'POST' }).catch(() => {});
         return true; // Bookmarked
       }
     } catch (error) {
@@ -344,6 +355,13 @@ export const comicService = {
         pageNumber,
         updatedAt: serverTimestamp(),
       }, { merge: true });
+
+      // Backend call for progress
+      fetch(`/api/read/${chapterId}/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: pageNumber })
+      }).catch(() => {});
 
       // Proactive pre-caching: pre-cache the next 3 pages
       this.preCachePages(mangaId, chapterId, pageNumber + 1, pageNumber + 3);

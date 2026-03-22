@@ -187,7 +187,7 @@ export const MangaDetails: React.FC = () => {
               >
                 {lastReadChapter ? (
                   <Link
-                    to={`/chapter/${lastReadChapter.id}`}
+                    to={`${location.pathname.startsWith("/comics/") ? "/read" : "/chapter"}/${lastReadChapter.id}`}
                     className="flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:bg-emerald-700 transition-all hover:scale-105"
                   >
                     <Play className="w-5 h-5 fill-current" />
@@ -195,7 +195,7 @@ export const MangaDetails: React.FC = () => {
                   </Link>
                 ) : chapters.length > 0 ? (
                   <Link
-                    to={`/chapter/${[...chapters].sort((a, b) => parseFloat(a.chapterNumber) - parseFloat(b.chapterNumber))[0].id}`}
+                    to={`${location.pathname.startsWith("/comics/") ? "/read" : "/chapter"}/${[...chapters].sort((a, b) => parseFloat(a.chapterNumber) - parseFloat(b.chapterNumber))[0].id}`}
                     className="flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:bg-emerald-700 transition-all hover:scale-105"
                   >
                     <Play className="w-5 h-5 fill-current" />
@@ -278,7 +278,7 @@ export const MangaDetails: React.FC = () => {
                 chapters.map((chapter) => (
                   <Link
                     key={chapter.id}
-                    to={`/chapter/${chapter.id}`}
+                    to={`${location.pathname.startsWith("/comics/") ? "/read" : "/chapter"}/${chapter.id}`}
                     className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-emerald-500/30 hover:bg-emerald-50/30 transition-all group"
                   >
                     <div className="flex items-center gap-4">

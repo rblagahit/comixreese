@@ -8,6 +8,7 @@ export const ChapterReader: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [mangaId, setMangaId] = useState<string | null>(null);
+  const [comicTitle, setComicTitle] = useState<string | undefined>();
   const [chapterNumber, setChapterNumber] = useState<string | undefined>();
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,10 @@ export const ChapterReader: React.FC = () => {
           // Sort ascending for navigation logic (currentIndex + 1 = next chapter)
           const sortedChapters = [...mangaChapters].sort((a, b) => parseFloat(a.chapterNumber) - parseFloat(b.chapterNumber));
           setChapters(sortedChapters);
+
+          // Fetch comic details for title
+          const comic = await mangaDexService.getMangaDetails(chapterData.comicId);
+          setComicTitle(comic.title);
         }
       } catch (error) {
         console.error("Error fetching chapter info:", error);
@@ -51,7 +56,8 @@ export const ChapterReader: React.FC = () => {
     }
 
     if (nextChapter) {
-      navigate(`/chapter/${nextChapter.id}`, { replace: true });
+      const pathPrefix = location.pathname.startsWith("/read/") ? "/read" : "/chapter";
+      navigate(`${pathPrefix}/${nextChapter.id}`, { replace: true });
     }
   };
 
@@ -59,46 +65,24 @@ export const ChapterReader: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white gap-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white gap-4">
         <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="font-medium">Loading reader...</p>
+        <p className="font-medium animate-pulse">Entering the reader...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black/95 pb-20">
-      {/* Reader Header */}
-      <div className="sticky top-0 z-20 w-full px-4 py-4 bg-black/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between">
-        <button
-          onClick={() => navigate(mangaId ? `/manga/${mangaId}` : "/")}
-          className="flex items-center gap-2 text-white/80 hover:text-white transition-colors group"
-        >
-          <div className="p-2 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors">
-            <ChevronLeft className="w-5 h-5" />
-          </div>
-          <span className="font-medium">Back to Manga</span>
-        </button>
-        
-        <div className="hidden md:block">
-          <h1 className="text-white/60 text-sm font-medium tracking-wide uppercase">
-            Chapter {chapterNumber}
-          </h1>
-        </div>
-        
-        <div className="w-24" /> {/* Spacer */}
-      </div>
-
-      <div className="pt-8">
-        {mangaId && (
-          <Reader 
-            mangaId={mangaId} 
-            chapterId={id} 
-            chapterNumber={chapterNumber} 
-            onChapterChange={handleChapterChange}
-          />
-        )}
-      </div>
+    <div className="min-h-screen bg-black">
+      {mangaId && (
+        <Reader 
+          mangaId={mangaId} 
+          chapterId={id} 
+          chapterNumber={chapterNumber} 
+          comicTitle={comicTitle}
+          onChapterChange={handleChapterChange}
+        />
+      )}
     </div>
   );
 };

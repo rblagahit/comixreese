@@ -94,10 +94,13 @@ function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/" || location.pathname === "/comics";
+    return location.pathname === path;
+  };
 
   // Don't show nav in reader
-  if (location.pathname.startsWith("/chapter/")) return null;
+  if (location.pathname.startsWith("/chapter/") || location.pathname.startsWith("/read/")) return null;
 
   return (
     <>
@@ -293,8 +296,11 @@ export default function App() {
           <main className="pt-0">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/comics" element={<Home />} />
               <Route path="/manga/:id" element={<MangaDetails />} />
+              <Route path="/comics/:id" element={<MangaDetails />} />
               <Route path="/chapter/:id" element={<ChapterReader />} />
+              <Route path="/read/:id" element={<ChapterReader />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/library" element={<Library />} />
             </Routes>

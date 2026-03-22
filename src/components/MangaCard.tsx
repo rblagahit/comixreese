@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Manga } from "../services/mangaDex";
 import { motion } from "motion/react";
 
@@ -8,12 +8,15 @@ interface MangaCardProps {
 }
 
 export const MangaCard: React.FC<MangaCardProps> = ({ manga }) => {
+  const location = useLocation();
+  const pathPrefix = location.pathname.startsWith("/comics") ? "/comics" : "/manga";
+
   return (
     <motion.div
       whileHover={{ y: -5 }}
       className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
     >
-      <Link to={`/manga/${manga.id}`}>
+      <Link to={`${pathPrefix}/${manga.id}`}>
         <div className="aspect-[2/3] relative overflow-hidden">
           <img
             src={manga.coverUrl}
