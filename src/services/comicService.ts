@@ -363,8 +363,9 @@ export const comicService = {
         body: JSON.stringify({ page: pageNumber })
       }).catch(() => {});
 
-      // Proactive pre-caching: pre-cache the next 3 pages
-      this.preCachePages(mangaId, chapterId, pageNumber + 1, pageNumber + 3);
+      // Proactive pre-caching: pre-cache the next N pages
+      const preloadCount = parseInt(import.meta.env.VITE_READER_PRELOAD || "3");
+      this.preCachePages(mangaId, chapterId, pageNumber + 1, pageNumber + preloadCount);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
     }

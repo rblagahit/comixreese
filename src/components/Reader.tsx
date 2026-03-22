@@ -29,10 +29,14 @@ export const Reader: React.FC<ReaderProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showUI, setShowUI] = useState(true);
   const [readingMode, setReadingMode] = useState<"vertical" | "horizontal">(() => {
-    return (localStorage.getItem("readingMode") as "vertical" | "horizontal") || "vertical";
+    return (localStorage.getItem("readingMode") as "vertical" | "horizontal") || 
+           (import.meta.env.VITE_READER_DEFAULT_MODE as "vertical" | "horizontal") || 
+           "vertical";
   });
   const [useDataSaver, setUseDataSaver] = useState(() => {
-    return localStorage.getItem("useDataSaver") === "true";
+    const stored = localStorage.getItem("useDataSaver");
+    if (stored !== null) return stored === "true";
+    return import.meta.env.VITE_READER_DATA_SAVER === "true";
   });
 
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -108,9 +112,10 @@ export const Reader: React.FC<ReaderProps> = ({
     
     comicService.updateProgress(mangaId, chapterId, chapterNumber || "0", currentPage);
     
-    // Pre-cache next 3 pages
+    // Pre-cache next N pages
+    const preloadCount = parseInt(import.meta.env.VITE_READER_PRELOAD || "3");
     if (currentPage < pages.length - 1) {
-      comicService.preCachePages(mangaId, chapterId, currentPage + 1, currentPage + 3);
+      comicService.preCachePages(mangaId, chapterId, currentPage + 1, currentPage + preloadCount);
     }
   }, [currentPage, mangaId, chapterId, chapterNumber, loading, pages.length]);
 

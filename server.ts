@@ -1,12 +1,20 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import rateLimit from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from "url";
 import { ImageCacheService } from "./server/services/imageCache";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const mangaDexLimiter = rateLimit({
+  windowMs: 1000, // 1 second
+  max: parseInt(process.env.MANGADEX_RATE_LIMIT || "5"), // limit each IP to 5 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 async function startServer() {
   const app = express();
@@ -18,8 +26,9 @@ async function startServer() {
   // MangaDex API Proxy
   app.use(
     "/api/mangadex",
+    mangaDexLimiter,
     createProxyMiddleware({
-      target: "https://api.mangadex.org",
+      target: process.env.MANGADEX_BASE_URL || "https://api.mangadex.org",
       changeOrigin: true,
       pathRewrite: {
         "^/api/mangadex": "",

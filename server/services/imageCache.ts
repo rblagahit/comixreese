@@ -4,8 +4,8 @@ import path from "path";
 import crypto from "crypto";
 
 const CACHE_FOLDER = path.join(process.cwd(), "image-cache");
-const MAX_CACHE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB limit
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB per image
+const MAX_CACHE_SIZE = parseInt(process.env.IMAGE_CACHE_MAX_SIZE || "5368709120"); // 5GB limit default
+const MAX_FILE_SIZE = parseInt(process.env.IMAGE_CACHE_MAX_FILE || "52428800"); // 50MB per image default
 
 export class ImageCacheService {
   static async init() {
