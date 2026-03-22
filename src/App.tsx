@@ -8,7 +8,8 @@ import { Home } from "./pages/Home";
 import { MangaDetails } from "./pages/MangaDetails";
 import { ChapterReader } from "./pages/ChapterReader";
 import { Bookmarks } from "./pages/Bookmarks";
-import { Search, Bookmark, Home as HomeIcon, User, Menu, X, LogOut } from "lucide-react";
+import { Library } from "./pages/Library";
+import { Search, Bookmark, Home as HomeIcon, User, Menu, X, LogOut, Library as LibraryIcon } from "lucide-react";
 import { useState, useEffect, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, User as FirebaseUser, db, OperationType, handleFirestoreError } from "./firebase";
@@ -135,6 +136,15 @@ function Navigation() {
               <Bookmark className="w-4 h-4" />
               Bookmarks
             </Link>
+            <Link
+              to="/library"
+              className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
+                isActive("/library") ? "text-emerald-600" : "text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              <LibraryIcon className="w-4 h-4" />
+              Library
+            </Link>
             
             {user ? (
               <div className="relative">
@@ -220,6 +230,14 @@ function Navigation() {
                 <Bookmark className="w-6 h-6 text-emerald-600" />
                 Bookmarks
               </Link>
+              <Link
+                to="/library"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-4 text-2xl font-bold text-gray-900"
+              >
+                <LibraryIcon className="w-6 h-6 text-emerald-600" />
+                Library
+              </Link>
               
               {user ? (
                 <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
@@ -278,6 +296,7 @@ export default function App() {
               <Route path="/manga/:id" element={<MangaDetails />} />
               <Route path="/chapter/:id" element={<ChapterReader />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/library" element={<Library />} />
             </Routes>
           </main>
         </div>

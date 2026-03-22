@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { mangaDexService, Manga, Chapter } from "../services/mangaDex";
+import { comicService, ImportedComic } from "../services/comicService";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronRight, Play, Bookmark, Share2, Info, List, Check } from "lucide-react";
+import { ChevronRight, Play, Bookmark, Share2, Info, List, Check, Plus, Library } from "lucide-react";
 import { useAuth } from "../App";
 import { db, handleFirestoreError, OperationType } from "../firebase";
-import { doc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, onSnapshot, serverTimestamp, collection, query, where, getDocs } from "firebase/firestore";
 
 export const MangaDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,8 @@ export const MangaDetails: React.FC = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [lastReadChapter, setLastReadChapter] = useState<{ id: string; chapter: string } | null>(null);
+  const [isImported, setIsImported] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,6 +32,11 @@ export const MangaDetails: React.FC = () => {
         ]);
         setManga(mangaData);
         setChapters(chaptersData);
+
+        // Check if imported
+        const q = query(collection(db, "comics"), where("mangadexId", "==", id));
+        const snapshot = await getDocs(q);
+        setIsImported(!snapshot.empty);
       } catch (error) {
         console.error("Error fetching manga details:", error);
       } finally {
@@ -75,25 +83,30 @@ export const MangaDetails: React.FC = () => {
     if (!manga || !id) return;
 
     setBookmarkLoading(true);
-    const bookmarkRef = doc(db, "users", user.uid, "bookmarks", id);
-
     try {
-      if (isBookmarked) {
-        await deleteDoc(bookmarkRef);
-      } else {
-        await setDoc(bookmarkRef, {
-          uid: user.uid,
-          mangaId: id,
-          title: manga.title,
-          coverUrl: manga.coverUrl,
-          author: manga.author,
-          createdAt: serverTimestamp(),
-        });
-      }
+      await comicService.toggleBookmark(manga);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/bookmarks/${id}`);
+      console.error("Error toggling bookmark:", error);
     } finally {
       setBookmarkLoading(false);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!user) {
+      signIn();
+      return;
+    }
+    if (!id || isImported) return;
+
+    setImportLoading(true);
+    try {
+      await comicService.importComic(id);
+      setIsImported(true);
+    } catch (error) {
+      console.error("Error importing comic:", error);
+    } finally {
+      setImportLoading(false);
     }
   };
 
@@ -200,6 +213,18 @@ export const MangaDetails: React.FC = () => {
                 >
                   {isBookmarked ? <Check className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
                   {isBookmarked ? "Bookmarked" : "Bookmark"}
+                </button>
+                <button
+                  onClick={handleImport}
+                  disabled={importLoading || isImported}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all ${
+                    isImported
+                      ? "bg-emerald-600 text-white shadow-lg"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  {isImported ? <Library className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                  {isImported ? "In Library" : "Add to Library"}
                 </button>
                 <button className="p-3 bg-white text-gray-700 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all">
                   <Share2 className="w-5 h-5" />

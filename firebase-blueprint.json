@@ -37,9 +37,46 @@
         "chapterId": { "type": "string", "description": "The last read chapter ID." },
         "chapterNumber": { "type": "string", "description": "The last read chapter number." },
         "pageNumber": { "type": "integer", "description": "The last read page number." },
+        "isCompleted": { "type": "boolean", "description": "Whether the chapter is completed." },
         "updatedAt": { "type": "string", "format": "date-time", "description": "When the progress was last updated." }
       },
       "required": ["uid", "mangaId", "chapterId"]
+    },
+    "Comic": {
+      "title": "Comic",
+      "description": "A manga imported from MangaDex.",
+      "type": "object",
+      "properties": {
+        "mangadexId": { "type": "string", "description": "The MangaDex ID." },
+        "title": { "type": "string", "description": "The title of the manga." },
+        "slug": { "type": "string", "description": "The URL-friendly slug." },
+        "description": { "type": "string", "description": "The description." },
+        "coverImage": { "type": "string", "description": "The cover image URL." },
+        "altTitles": { "type": "array", "items": { "type": "string" }, "description": "Alternative titles." },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Tags/genres." },
+        "status": { "type": "string", "description": "Publication status." },
+        "contentRating": { "type": "string", "description": "Content rating (safe, suggestive, etc)." },
+        "year": { "type": "integer", "description": "Release year." },
+        "lastChapterAt": { "type": "string", "format": "date-time", "description": "When the latest chapter was published." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When it was imported." }
+      },
+      "required": ["mangadexId", "title", "slug"]
+    },
+    "Chapter": {
+      "title": "Chapter",
+      "description": "A chapter of an imported manga.",
+      "type": "object",
+      "properties": {
+        "mangadexId": { "type": "string", "description": "The MangaDex ID." },
+        "comicId": { "type": "string", "description": "The Firestore ID of the parent comic." },
+        "chapterNumber": { "type": "string", "description": "The chapter number." },
+        "title": { "type": "string", "description": "The chapter title." },
+        "volumeNumber": { "type": "integer", "description": "The volume number." },
+        "language": { "type": "string", "description": "The language code." },
+        "publishedAt": { "type": "string", "format": "date-time", "description": "When it was published." },
+        "scanStatus": { "type": "string", "description": "Scan status (pending, ready, error)." }
+      },
+      "required": ["mangadexId", "comicId", "chapterNumber"]
     }
   },
   "firestore": {
@@ -54,6 +91,14 @@
     "/users/{userId}/progress/{mangaId}": {
       "schema": "ReadingProgress",
       "description": "User's reading progress for specific manga."
+    },
+    "/comics/{comicId}": {
+      "schema": "Comic",
+      "description": "Imported comics collection."
+    },
+    "/comics/{comicId}/chapters/{chapterId}": {
+      "schema": "Chapter",
+      "description": "Chapters subcollection for a comic."
     }
   }
 }

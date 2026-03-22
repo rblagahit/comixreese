@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Maximize, Minimize, Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, Minimize, Settings, Zap, ZapOff } from "lucide-react";
 import { mangaDexService, Page } from "../services/mangaDex";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../App";
 import { db, handleFirestoreError, OperationType } from "../firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
 interface ReaderProps {
   mangaId: string;
@@ -19,6 +19,13 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [useDataSaver, setUseDataSaver] = useState(() => {
+    return localStorage.getItem("useDataSaver") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("useDataSaver", String(useDataSaver));
+  }, [useDataSaver]);
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -26,7 +33,24 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
       try {
         const data = await mangaDexService.getChapterPages(chapterId);
         setPages(data.pages);
-        setCurrentPage(0);
+
+        // Try to resume progress
+        if (user) {
+          const progressRef = doc(db, "users", user.uid, "progress", mangaId);
+          const snapshot = await getDoc(progressRef);
+          if (snapshot.exists()) {
+            const progressData = snapshot.data();
+            if (progressData.chapterId === chapterId && progressData.pageNumber < data.pages.length) {
+              setCurrentPage(progressData.pageNumber);
+            } else {
+              setCurrentPage(0);
+            }
+          } else {
+            setCurrentPage(0);
+          }
+        } else {
+          setCurrentPage(0);
+        }
       } catch (error) {
         console.error("Error fetching pages:", error);
       } finally {
@@ -35,14 +59,16 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
     };
 
     fetchPages();
-  }, [chapterId]);
+  }, [chapterId, user, mangaId]);
 
   // Track progress
   useEffect(() => {
-    if (!user || !mangaId || !chapterId || loading) return;
+    if (!user || !mangaId || !chapterId || loading || pages.length === 0) return;
 
     const updateProgress = async () => {
       const progressRef = doc(db, "users", user.uid, "progress", mangaId);
+      const isCompleted = currentPage >= pages.length - 1;
+      
       try {
         await setDoc(progressRef, {
           uid: user.uid,
@@ -50,6 +76,7 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
           chapterId,
           chapterNumber: chapterNumber || null,
           pageNumber: currentPage,
+          isCompleted,
           updatedAt: serverTimestamp(),
         }, { merge: true });
       } catch (error) {
@@ -59,7 +86,7 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
 
     const timeoutId = setTimeout(updateProgress, 2000); // Debounce updates
     return () => clearTimeout(timeoutId);
-  }, [user, mangaId, chapterId, chapterNumber, currentPage, loading]);
+  }, [user, mangaId, chapterId, chapterNumber, currentPage, loading, pages.length]);
 
   const handleNext = () => {
     if (currentPage < pages.length - 1) {
@@ -110,8 +137,8 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-sm font-medium">
-            Page {currentPage + 1} of {pages.length}
+          <span className="text-sm font-medium whitespace-nowrap">
+            Page {currentPage + 1} / {pages.length}
           </span>
           <button
             onClick={handleNext}
@@ -123,6 +150,13 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setUseDataSaver(!useDataSaver)}
+            className={`p-2 rounded-xl transition-colors ${useDataSaver ? "bg-emerald-500 text-white" : "hover:bg-white/10 text-white/60"}`}
+            title={useDataSaver ? "Data Saver ON" : "Data Saver OFF"}
+          >
+            {useDataSaver ? <Zap className="w-5 h-5" /> : <ZapOff className="w-5 h-5" />}
+          </button>
           <button
             onClick={toggleFullscreen}
             className="p-2 hover:bg-white/10 rounded-xl transition-colors"
@@ -140,12 +174,12 @@ export const Reader: React.FC<ReaderProps> = ({ mangaId, chapterId, chapterNumbe
       <div className="w-full relative min-h-[80vh] flex items-center justify-center">
         <AnimatePresence mode="wait">
           <motion.img
-            key={`${chapterId}-${currentPage}`}
+            key={`${chapterId}-${currentPage}-${useDataSaver}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
-            src={mangaDexService.getPageUrl(pages[currentPage])}
+            src={mangaDexService.getPageUrl(pages[currentPage], useDataSaver)}
             alt={`Page ${currentPage + 1}`}
             className="max-w-full h-auto shadow-2xl rounded-lg"
             referrerPolicy="no-referrer"

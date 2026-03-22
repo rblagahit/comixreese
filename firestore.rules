@@ -100,21 +100,72 @@ service cloud.firestore {
 
     function isValidReadingProgress(data) {
       return hasRequiredFields(['uid', 'mangaId', 'chapterId', 'pageNumber', 'updatedAt']) &&
-             hasOnlyAllowedFields(['uid', 'mangaId', 'chapterId', 'chapterNumber', 'pageNumber', 'updatedAt']) &&
+             hasOnlyAllowedFields(['uid', 'mangaId', 'chapterId', 'chapterNumber', 'pageNumber', 'isCompleted', 'updatedAt']) &&
              data.uid == request.auth.uid &&
              data.mangaId is string && data.mangaId.size() < 100 &&
              data.chapterId is string && data.chapterId.size() < 100 &&
              (data.chapterNumber == null || (data.chapterNumber is string && data.chapterNumber.size() < 20)) &&
              data.pageNumber is int && data.pageNumber >= 0 &&
+             (data.isCompleted == null || data.isCompleted is bool) &&
              data.updatedAt is timestamp;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "rblagahit@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidComic(data) {
+      return hasRequiredFields(['mangadexId', 'title', 'slug', 'createdAt']) &&
+             hasOnlyAllowedFields(['mangadexId', 'title', 'slug', 'description', 'coverImage', 'altTitles', 'tags', 'status', 'contentRating', 'year', 'lastChapterAt', 'createdAt']) &&
+             data.mangadexId is string && data.mangadexId.size() < 100 &&
+             data.title is string && data.title.size() < 200 &&
+             data.slug is string && data.slug.size() < 200 &&
+             (data.description == null || (data.description is string && data.description.size() < 5000)) &&
+             (data.coverImage == null || isValidUrl(data.coverImage)) &&
+             (data.altTitles == null || data.altTitles is list) &&
+             (data.tags == null || data.tags is list) &&
+             (data.status == null || (data.status is string && data.status.size() < 50)) &&
+             (data.contentRating == null || (data.contentRating is string && data.contentRating.size() < 50)) &&
+             (data.year == null || data.year is int) &&
+             (data.lastChapterAt == null || data.lastChapterAt is timestamp) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidChapter(data) {
+      return hasRequiredFields(['mangadexId', 'comicId', 'chapterNumber', 'publishedAt']) &&
+             hasOnlyAllowedFields(['mangadexId', 'comicId', 'chapterNumber', 'title', 'volumeNumber', 'language', 'publishedAt', 'scanStatus']) &&
+             data.mangadexId is string && data.mangadexId.size() < 100 &&
+             data.comicId is string && data.comicId.size() < 100 &&
+             data.chapterNumber is string && data.chapterNumber.size() < 20 &&
+             (data.title == null || (data.title is string && data.title.size() < 200)) &&
+             (data.volumeNumber == null || data.volumeNumber is int) &&
+             (data.language == null || (data.language is string && data.language.size() < 10)) &&
+             data.publishedAt is timestamp &&
+             (data.scanStatus == null || (data.scanStatus is string && data.scanStatus.size() < 20));
     }
 
     // ===============================================================
     // Rules
     // ===============================================================
 
+    match /comics/{comicId} {
+      allow read: if true; // Publicly readable
+      allow create: if isAuthenticated() && isValidComic(request.resource.data);
+      allow update: if isAuthenticated() && isValidComic(request.resource.data);
+      allow delete: if isAdmin();
+
+      match /chapters/{chapterId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && isValidChapter(request.resource.data);
+        allow update: if isAuthenticated() && isValidChapter(request.resource.data);
+        allow delete: if isAdmin();
+      }
+    }
+
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
       allow update: if isOwner(userId) && isValidUserProfile(request.resource.data) && uidNotModified();
 
